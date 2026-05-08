@@ -478,10 +478,16 @@ function startAdapter(options) {
             }
         },
         unload: callback => {
-            renewTimeout && clearTimeout(renewTimeout);
-            lgtvobj && lgtvobj.disconnect();
-            isConnect = false;
-            checkConnection(true);
+            try {
+                adapter.clearTimeout(renewTimeout);
+                adapter.clearInterval(healthInterval);
+                if (lgtvobj) {
+                    lgtvobj.disconnect();
+                }
+                isConnect = false;
+            } catch {
+                // ignore errors during shutdown
+            }
             callback();
         },
         ready: () => {
@@ -609,11 +615,11 @@ function connect(cb) {
                 curApp = res.appId || '';
                 if (!curApp) {
                     // some TV send empty app first, if they switched on
-                    setTimeout(function () {
+                    adapter.setTimeout(function () {
                         if (!curApp) {
                             // curApp is not set in meantime
                             if (healthInterval && !adapter.config.healthInterval) {
-                                clearInterval(healthInterval);
+                                adapter.clearInterval(healthInterval);
                                 healthInterval = false; // TV works fine,  healthInterval is not longer nessessary
                                 adapter.log.info(
                                     'detect poweroff event, polling not longer nessesary. if you have problems, check settings',
@@ -690,12 +696,12 @@ function checkConnection(secondCheck) {
     if (secondCheck) {
         if (!isConnect) {
             adapter.setStateChanged('info.connection', false, true);
-            healthInterval && clearInterval(healthInterval);
+            adapter.clearInterval(healthInterval);
             checkCurApp(true);
         }
     } else {
         isConnect = false;
-        setTimeout(checkConnection, 10000, true); //check, if isConnect is changed in 10 sec
+        adapter.setTimeout(checkConnection, 10000, true); //check, if isConnect is changed in 10 sec
     }
 }
 
@@ -707,7 +713,7 @@ function checkCurApp(powerOff) {
     adapter.log.debug(curApp ? `cur app is ${curApp}` : 'TV is off');
 
     if (curApp == 'com.webos.app.livetv') {
-        setTimeout(() => {
+        adapter.setTimeout(() => {
             lgtvobj.subscribe('ssap://tv/getCurrentChannel', (err, res) => {
                 if (!err && res) {
                     adapter.log.debug(`tv/getCurrentChannel: ${JSON.stringify(res)}`);
@@ -737,15 +743,15 @@ function checkCurApp(powerOff) {
     adapter.setStateChanged('states.on', isTVon, true, function (err, stateID, notChanged) {
         if (!notChanged) {
             // state was changed
-            renewTimeout && clearTimeout(renewTimeout); // avoid toggeling
+            adapter.clearTimeout(renewTimeout); // avoid toggeling
             if (isTVon) {
                 // if tv is now switched on ...
                 adapter.log.debug('renew connection in one minute for stable subscriptions...');
-                renewTimeout = setTimeout(() => {
+                renewTimeout = adapter.setTimeout(() => {
                     lgtvobj.disconnect();
-                    setTimeout(lgtvobj.connect, 500, hostUrl);
+                    adapter.setTimeout(lgtvobj.connect, 500, hostUrl);
                     if (healthInterval !== false) {
-                        healthInterval = setInterval(
+                        healthInterval = adapter.setInterval(
                             sendCommand,
                             adapter.config.healthInterval || 60000,
                             'ssap://com.webos.service.tv.time/getCurrentTime',
@@ -803,11 +809,11 @@ function bypassCertificateValidation() {
 function SetVolume(val) {
     if (val >= volume + 5) {
         let vol = oldvolume;
-        const interval = setInterval(() => {
+        const interval = adapter.setInterval(() => {
             vol = vol + 2;
             if (vol >= val) {
                 vol = val;
-                clearInterval(interval);
+                adapter.clearInterval(interval);
             }
             sendCommand('ssap://audio/setVolume', { volume: vol }, (err, _resp) => {
                 if (!err) {
