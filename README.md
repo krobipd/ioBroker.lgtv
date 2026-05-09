@@ -177,6 +177,12 @@ is true when TV is on and false if TV is off
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+- (krobipd) Handling of online state has been improved.
+- (krobipd) Support for picture settings has been added.
+- (krobipd) Timerhandling has been cleaned up.
+- (mcm1957) Dependencies have been updated
+ 
 ### 2.6.0 (2026-04-20)
 - (mcm1957) Adapter requires node.js >= 22 now
 - (copilot) Adapter requires admin >= 7.7.22 now
