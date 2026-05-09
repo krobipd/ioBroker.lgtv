@@ -892,6 +892,189 @@
         "write": true
       },
       "native": {}
+    },
+    {
+      "_id": "states.picture",
+      "type": "channel",
+      "common": {
+        "name": "Picture settings"
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.pictureMode",
+      "type": "state",
+      "common": {
+        "name": "Picture mode",
+        "desc": "Union of picture-mode IDs across LG OLED generations C8 (2018) through G5 (2025). Only a subset is active per TV model and content type (SDR / HDR / Dolby Vision); writing an unsupported value is silently ignored by the TV.",
+        "role": "state",
+        "type": "string",
+        "read": true,
+        "write": true,
+        "states": {
+          "cinema": "Cinema",
+          "dolbyHdrCinema": "Dolby HDR Cinema",
+          "dolbyHdrCinemaBright": "Dolby HDR Cinema Bright",
+          "dolbyHdrDarkAmazon": "Dolby HDR Dark Amazon",
+          "dolbyHdrGame": "Dolby HDR Game",
+          "dolbyHdrPersonalized": "Dolby HDR Personalized",
+          "dolbyHdrStandard": "Dolby HDR Standard",
+          "dolbyHdrVivid": "Dolby HDR Vivid",
+          "dolbyStandard": "Dolby Standard",
+          "eco": "Eco",
+          "expert1": "Expert 1",
+          "expert2": "Expert 2",
+          "filmMaker": "Filmmaker",
+          "game": "Game",
+          "hdrCinema": "HDR Cinema",
+          "hdrCinemaBright": "HDR Cinema Bright",
+          "hdrEco": "HDR Eco",
+          "hdrEffect": "HDR Effect",
+          "hdrExternal": "HDR External",
+          "hdrFilmMaker": "HDR Filmmaker",
+          "hdrGame": "HDR Game",
+          "hdrPersonalized": "HDR Personalized",
+          "hdrStandard": "HDR Standard",
+          "hdrTechnicolor": "HDR Technicolor",
+          "hdrVivid": "HDR Vivid",
+          "normal": "Normal",
+          "personalized": "Personalized",
+          "photo": "Photo",
+          "sports": "Sports",
+          "technicolor": "Technicolor",
+          "technicolorHdrCinema": "Technicolor HDR Cinema",
+          "technicolorHdrCinemaBright": "Technicolor HDR Cinema Bright",
+          "technicolorHdrGame": "Technicolor HDR Game",
+          "technicolorHdrStandard": "Technicolor HDR Standard",
+          "technicolorHdrTechnicolor": "Technicolor HDR Technicolor",
+          "technicolorHdrVivid": "Technicolor HDR Vivid",
+          "vivid": "Vivid"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.brightness",
+      "type": "state",
+      "common": {
+        "name": "Brightness",
+        "role": "level.brightness",
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "read": true,
+        "write": true
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.backlight",
+      "type": "state",
+      "common": {
+        "name": "Backlight",
+        "role": "level.dimmer",
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "read": true,
+        "write": true
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.contrast",
+      "type": "state",
+      "common": {
+        "name": "Contrast",
+        "role": "level",
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "read": true,
+        "write": true
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.color",
+      "type": "state",
+      "common": {
+        "name": "Color saturation",
+        "role": "level.saturation",
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "read": true,
+        "write": true
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.colorTemperature",
+      "type": "state",
+      "common": {
+        "name": "Color temperature",
+        "role": "level",
+        "type": "number",
+        "min": -50,
+        "max": 50,
+        "read": true,
+        "write": true
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.justScan",
+      "type": "state",
+      "common": {
+        "name": "Just Scan (overscan)",
+        "role": "state",
+        "type": "string",
+        "read": true,
+        "write": true,
+        "states": {
+          "auto": "Auto",
+          "on": "On",
+          "off": "Off"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.energySaving",
+      "type": "state",
+      "common": {
+        "name": "Energy saving mode",
+        "role": "state",
+        "type": "string",
+        "read": true,
+        "write": true,
+        "states": {
+          "auto": "Auto",
+          "off": "Off",
+          "min": "Min",
+          "med": "Medium",
+          "max": "Max",
+          "screen_off": "Screen off"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "states.picture.eyeComfortMode",
+      "type": "state",
+      "common": {
+        "name": "Eye Comfort / Reduce Blue Light",
+        "role": "switch",
+        "type": "string",
+        "read": true,
+        "write": true,
+        "states": {
+          "on": "On",
+          "off": "Off"
+        }
+      },
+      "native": {}
     }
   ]
 }

@@ -15,6 +15,39 @@ let renewTimeout = null;
 let healthInterval = null;
 let curApp = '';
 
+// Picture settings — write goes through createAlert with the alert immediately
+// closed (the TV applies the luna setting via the onclose handler). Read goes
+// through ssap://settings/getSystemSettings, one subscription per key so a
+// single unsupported property does not silently kill the whole subscription.
+const PICTURE_KEYS = new Set([
+    'pictureMode',
+    'brightness',
+    'backlight',
+    'contrast',
+    'color',
+    'colorTemperature',
+    'energySaving',
+    'eyeComfortMode',
+    'justScan',
+]);
+const PICTURE_NUMERIC_KEYS = new Set(['brightness', 'backlight', 'contrast', 'color', 'colorTemperature']);
+// Picture writes go through the generic "picture" category; justScan is the
+// one exception — it accepts writes via the dedicated "aspectRatio" category.
+// All reads go through "picture"; webOS authorisation blocks reads of
+// pictureMode/colorTemperature/eyeComfortMode/justScan from there as well, so
+// those four properties end up effectively write-only on the public API.
+function setCategoryFor(key) {
+    return key === 'justScan' ? 'aspectRatio' : 'picture';
+}
+
+function coercePictureValue(key, raw) {
+    if (PICTURE_NUMERIC_KEYS.has(key)) {
+        const n = typeof raw === 'number' ? raw : Number(raw);
+        return Number.isFinite(n) ? n : null;
+    }
+    return typeof raw === 'string' ? raw : String(raw);
+}
+
 function startAdapter(options) {
     options = options || {};
     Object.assign(options, {
@@ -30,6 +63,13 @@ function startAdapter(options) {
                     dy = parseInt(vals[1]);
                 }
                 adapter.log.debug(`State change "${id}" - VALUE: ${state.val}`);
+                if (id.startsWith('states.picture.')) {
+                    const key = id.substring('states.picture.'.length);
+                    if (PICTURE_KEYS.has(key) && state.val !== null && state.val !== undefined) {
+                        setPictureSetting(key, state.val);
+                    }
+                    return;
+                }
                 switch (id) {
                     case 'states.popup':
                         adapter.log.debug(`Sending popup message "${state.val}" to WebOS TV: ${adapter.config.ip}`);
@@ -645,6 +685,31 @@ function connect(cb) {
                 adapter.log.debug(`ERROR on getSoundOutput: ${err}`);
             }
         });
+        // Subscribe to each picture setting individually — bundling keys into a
+        // single request silently drops the whole subscription on TVs that do not
+        // support every key (varies by webOS version and model). The TV pushes
+        // some properties only on change, so we additionally fetch the initial
+        // values via request for every key.
+        PICTURE_KEYS.forEach(key => {
+            const cat = 'picture';
+            const handler = (err, res) => {
+                if (err) {
+                    adapter.log.debug(`getSystemSettings(${cat}.${key}) error: ${err}`);
+                    return;
+                }
+                if (res && res.settings && res.settings[key] !== undefined && res.settings[key] !== null) {
+                    const value = coercePictureValue(key, res.settings[key]);
+                    if (value !== null) {
+                        adapter.log.debug(`getSystemSettings ${cat}.${key}: ${value}`);
+                        adapter.setState(`states.picture.${key}`, value, true);
+                    }
+                } else {
+                    adapter.log.debug(`getSystemSettings ${cat}.${key} no value: ${JSON.stringify(res).slice(0, 200)}`);
+                }
+            };
+            lgtvobj.subscribe('ssap://settings/getSystemSettings', { category: cat, keys: [key] }, handler);
+            lgtvobj.request('ssap://settings/getSystemSettings', { category: cat, keys: [key] }, handler);
+        });
         sendCommand('ssap://api/getServiceList', null, (err, val) => {
             if (!err) {
                 adapter.log.debug(`Service list: ${JSON.stringify(val)}`);
@@ -692,6 +757,40 @@ const inputList = arr => {
     });
     return obj;
 };
+
+// Writes a single picture setting via the createAlert + onClick(luna) bridge.
+// The direct ssap setSystemSettings path is not exposed on the public web
+// socket interface, so we hand the actual luna URI to a system alert which the
+// TV executes via its onclose/onfail handlers. The alert is closed
+// programmatically right after creation, keeping the popup invisible.
+function setPictureSetting(key, value) {
+    const params = { category: setCategoryFor(key), settings: { [key]: value } };
+    const lunaUri = 'luna://com.webos.settingsservice/setSystemSettings';
+    sendCommand(
+        'ssap://system.notifications/createAlert',
+        {
+            title: ' ',
+            message: ' ',
+            modal: true,
+            type: 'confirm',
+            isSysReq: true,
+            buttons: [{ label: 'OK', focus: true, buttonType: 'ok', onClick: lunaUri, params }],
+            onclose: { uri: lunaUri, params },
+            onfail: { uri: lunaUri, params },
+        },
+        (err, val) => {
+            if (err) {
+                adapter.log.warn(`set picture.${key}=${value} failed: ${err}`);
+                return;
+            }
+            adapter.log.debug(`set picture.${key}=${value}: ${JSON.stringify(val)}`);
+            adapter.setState(`states.picture.${key}`, value, true);
+            if (val && val.alertId) {
+                sendCommand('ssap://system.notifications/closeAlert', { alertId: val.alertId }, () => {});
+            }
+        },
+    );
+}
 function checkConnection(secondCheck) {
     if (secondCheck) {
         if (!isConnect) {
