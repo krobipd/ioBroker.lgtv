@@ -1,4 +1,10 @@
 # Older changes
+## 2.3.1 (2024-12-03)
+
+* (Feuer-Sturm) Some default values and limits of paramaters have been corrected.
+
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## 2.3.0 (2024-12-02)
 
 * (mcm1957) Adapter requires node.js 20 now.

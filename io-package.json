@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lgtv",
-    "version": "2.6.0",
+    "version": "2.7.0",
     "news": {
+      "2.7.0": {
+        "en": "Handling of online state has been improved.\nSupport for picture settings has been added.\nTimerhandling has been cleaned up.\nDependencies have been updated",
+        "de": "Der Umgang mit Online-Zustand wurde verbessert.\nUnterstützung für Bildeinstellungen wurde hinzugefügt.\nTimerhandling wurde gereinigt.\nAbhängigkeiten wurden aktualisiert",
+        "ru": "Улучшена работа с онлайн-государством.\nДобавлена поддержка настроек изображения.\nТаймшерлинг был очищен.\nЗависимости были обновлены",
+        "pt": "O tratamento do estado online foi melhorado.\nO suporte para configurações de imagem foi adicionado.\nO temporizador foi limpo.\nAs dependências foram atualizadas",
+        "nl": "De omgang met online state is verbeterd.\nOndersteuning voor afbeeldingsinstellingen is toegevoegd.\nTimerhandling is opgeruimd.\nAfhankelijkheden zijn bijgewerkt",
+        "fr": "Le traitement de l'état en ligne a été amélioré.\nLa prise en charge des paramètres d'image a été ajoutée.\nLe traitement du temps a été nettoyé.\nLes dépendances ont été actualisées",
+        "it": "La gestione dello stato online è stata migliorata.\nÈ stato aggiunto il supporto per le impostazioni dell'immagine.\nIl timerhandling è stato ripulito.\nLe dipendenze sono state aggiornate",
+        "es": "Se ha mejorado el manejo del estado en línea.\nSe ha añadido soporte para ajustes de imagen.\nEl manejo temporal ha sido limpiado.\nSe han actualizado las dependencias",
+        "pl": "Ulepszono obsługę państwa online.\nDodano wsparcie dla ustawień obrazu.\nObróbka czasu została wyczyszczona.\nZaktualizowano zależności",
+        "uk": "Удосконалено роботу онлайн-держави.\nДодано підтримку налаштування зображень.\nОчищається від часу.\nЗалежність було оновлено",
+        "zh-cn": "对在线状态的处理有所改善.\n已添加对图片设置的支持 .\n计时处理已经清理完毕.\n依赖关系已更新"
+      },
       "2.6.0": {
         "en": "Adapter requires node.js >= 22 now\nAdapter requires admin >= 7.7.22 now\nExternal_speaker option to soundOutput state list added.\nDependencies have been updated",
         "de": "Adapter benötigt node.js >= 22 jetzt\nAdapter benötigt admin >= 7.7.22 jetzt\nExternal speaker option to soundOutput state list hinzugefügt.\nAbhängigkeiten wurden aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "Adapter wymaga Node.js 20 teraz.\nAdapter wymaga sterownika js- 5 i admin 6 teraz.\nAdapter został wyemigrowany do jsonConfig i responsywne zasady projektowania zostały zastosowane.\nZaktualizowano zależność.",
         "uk": "Адаптер вимагає node.js 20 тепер.\nАдаптер вимагає js-controller 5 і admin 6 тепер.\nПерехідник був мігрований до jsonConfig і чуйних правил дизайну.\nОновлено залежність.",
         "zh-cn": "适配器现在需要20号节点.\n适配器现在需要js控制器5和管理员6.\n适配器已迁移到jsonConfig,并应用了响应性设计规则.\n附属关系已经更新."
-      },
-      "2.2.0": {
-        "en": "Adapter requires node.js 18 and js-controller >= 5 now\nDependencies have been updated",
-        "de": "Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAbhängigkeiten wurden aktualisiert",
-        "ru": "Адаптер требует node.js 18 и js-controller >= 5 сейчас\nЗависимость обновлена",
-        "pt": "Adapter requer node.js 18 e js-controller >= 5 agora\nAs dependências foram atualizadas",
-        "nl": "Adapter vereist node.js 18 en js-controller Nu 5\nAfhankelijkheden zijn bijgewerkt",
-        "fr": "Adaptateur nécessite node.js 18 et js-controller >= 5 maintenant\nLes dépendances ont été actualisées",
-        "it": "Adattatore richiede node.js 18 e js-controller >= 5 ora\nLe dipendenze sono state aggiornate",
-        "es": "Adaptador requiere node.js 18 y js-controller √= 5 ahora\nSe han actualizado las dependencias",
-        "pl": "Adapter wymaga node.js 18 i sterownika js- > = 5 teraz\nZaktualizowano zależności",
-        "uk": "Адаптер вимагає node.js 18 і js-controller >= 5 тепер\nЗалежність було оновлено",
-        "zh-cn": "适配器需要节点.js 18和js控制器 QQ 现在5号\n依赖关系已更新"
       }
     },
     "titleLang": {
