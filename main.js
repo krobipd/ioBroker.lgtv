@@ -693,18 +693,12 @@ function connect(cb) {
         PICTURE_KEYS.forEach(key => {
             const cat = 'picture';
             const handler = (err, res) => {
-                if (err) {
-                    adapter.log.debug(`getSystemSettings(${cat}.${key}) error: ${err}`);
+                if (err || !res || !res.settings || res.settings[key] === undefined || res.settings[key] === null) {
                     return;
                 }
-                if (res && res.settings && res.settings[key] !== undefined && res.settings[key] !== null) {
-                    const value = coercePictureValue(key, res.settings[key]);
-                    if (value !== null) {
-                        adapter.log.debug(`getSystemSettings ${cat}.${key}: ${value}`);
-                        adapter.setState(`states.picture.${key}`, value, true);
-                    }
-                } else {
-                    adapter.log.debug(`getSystemSettings ${cat}.${key} no value: ${JSON.stringify(res).slice(0, 200)}`);
+                const value = coercePictureValue(key, res.settings[key]);
+                if (value !== null) {
+                    adapter.setState(`states.picture.${key}`, value, true);
                 }
             };
             lgtvobj.subscribe('ssap://settings/getSystemSettings', { category: cat, keys: [key] }, handler);
@@ -783,7 +777,6 @@ function setPictureSetting(key, value) {
                 adapter.log.warn(`set picture.${key}=${value} failed: ${err}`);
                 return;
             }
-            adapter.log.debug(`set picture.${key}=${value}: ${JSON.stringify(val)}`);
             adapter.setState(`states.picture.${key}`, value, true);
             if (val && val.alertId) {
                 sendCommand('ssap://system.notifications/closeAlert', { alertId: val.alertId }, () => {});
