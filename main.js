@@ -48,6 +48,18 @@ function coercePictureValue(key, raw) {
     return typeof raw === 'string' ? raw : String(raw);
 }
 
+// Reconnect watchdog: the underlying lgtv2 library relies on the `websocket@1`
+// package for retries. If that socket gets stuck during the connect handshake
+// (TCP open, no upgrade response, no `connectFailed` event), the library never
+// schedules another retry and the adapter stays "offline" until the user
+// restarts it. The watchdog observes how long ago the library last emitted a
+// `connecting` event and forces a fresh LGTV instance once the gap exceeds
+// the threshold while we're still disconnected.
+let lastConnectingAt = 0;
+let watchdogTimer = null;
+const WATCHDOG_CHECK_MS = 30000;
+const WATCHDOG_STUCK_MS = 60000;
+
 function startAdapter(options) {
     options = options || {};
     Object.assign(options, {
@@ -521,6 +533,10 @@ function startAdapter(options) {
             try {
                 adapter.clearTimeout(renewTimeout);
                 adapter.clearInterval(healthInterval);
+                if (watchdogTimer) {
+                    adapter.clearInterval(watchdogTimer);
+                    watchdogTimer = null;
+                }
                 if (lgtvobj) {
                     lgtvobj.disconnect();
                 }
@@ -565,6 +581,7 @@ function connect(cb) {
         },
     });
     lgtvobj.on('connecting', host => {
+        lastConnectingAt = Date.now();
         adapter.log.debug(`Connecting to WebOS TV: ${host}`);
         checkConnection();
     });
@@ -740,6 +757,11 @@ function connect(cb) {
         });
         cb && cb();
     });
+
+    lastConnectingAt = Date.now();
+    if (!watchdogTimer) {
+        watchdogTimer = adapter.setInterval(checkReconnectWatchdog, WATCHDOG_CHECK_MS);
+    }
 }
 
 const launchList = arr => {
@@ -802,6 +824,27 @@ function checkConnection(secondCheck) {
         isConnect = false;
         adapter.setTimeout(checkConnection, 10000, true); //check, if isConnect is changed in 10 sec
     }
+}
+
+function checkReconnectWatchdog() {
+    if (isConnect) {
+        return;
+    }
+    const idleMs = Date.now() - lastConnectingAt;
+    if (idleMs <= WATCHDOG_STUCK_MS) {
+        return;
+    }
+    adapter.log.warn(
+        `[WATCHDOG] No reconnect attempt for ${Math.round(idleMs / 1000)}s while disconnected — recreating LGTV instance`,
+    );
+    try {
+        lgtvobj && lgtvobj.disconnect();
+    } catch (err) {
+        adapter.log.debug(`[WATCHDOG] disconnect failed: ${err}`);
+    }
+    // Suppress retrigger until the new instance has had a chance to settle.
+    lastConnectingAt = Date.now();
+    adapter.setTimeout(connect, 1000);
 }
 
 function checkCurApp(powerOff) {
