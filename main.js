@@ -751,8 +751,8 @@ function checkCurApp(powerOff) {
                             'ssap://com.webos.service.tv.time/getCurrentTime',
                             null,
                             (err, _val) => {
-                                adapter.log.debug(`check TV connection: ${err || 'ok'}`);
                                 if (err) {
+                                    adapter.log.debug(`check TV connection failed: ${err}`);
                                     checkCurApp(true);
                                 }
                             },
