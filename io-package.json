@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "lgtv",
-    "version": "2.7.0",
+    "version": "2.7.1",
     "news": {
-      "2.7.0": {
+      "2.7.1": {
         "en": "Handling of online state has been improved.\nSupport for picture settings has been added.\nTimerhandling has been cleaned up.\nDependencies have been updated",
         "de": "Der Umgang mit Online-Zustand wurde verbessert.\nUnterstützung für Bildeinstellungen wurde hinzugefügt.\nTimerhandling wurde gereinigt.\nAbhängigkeiten wurden aktualisiert",
         "ru": "Улучшена работа с онлайн-государством.\nДобавлена поддержка настроек изображения.\nТаймшерлинг был очищен.\nЗависимости были обновлены",
@@ -80,19 +80,6 @@
         "pl": "Niektóre wartości domyślne i granice parametrów zostały skorygowane.",
         "uk": "Виправлено деякі значення за замовчуванням та ліміти параметрів.",
         "zh-cn": "参数的一些默认值和限度已经纠正."
-      },
-      "2.3.0": {
-        "en": "Adapter requires node.js 20 now.\nAdapter requires js-controller 5 and admin 6 now.\nAdapter has been migrated to jsonConfig and responsive design rules have been applied.\nDependencies have been updated.",
-        "de": "Adapter benötigt node.js 20 jetzt.\nAdapter benötigt jetzt js-controller 5 und admin 6.\nAdapter wurde auf jsonConfig migriert und responsive Designregeln angewendet.\nAbhängigkeiten wurden aktualisiert.",
-        "ru": "Адаптер требует node.js 20.\nАдаптер требует js-controller 5 и admin 6.\nАдаптер был перенесен на jsonConfig, и были применены соответствующие правила проектирования.\nЗависимость была обновлена.",
-        "pt": "Adaptador requer node.js 20 agora.\nAdaptador requer js-controller 5 e admin 6 agora.\nAdapter foi migrado para jsonConfig e regras de projeto responsivas foram aplicadas.\nAs dependências foram atualizadas.",
-        "nl": "Adapter vereist node.js 20 nu.\nAdapter vereist js-controller 5 en admin 6.\nAdapter is gemigreerd naar jsonConfig en responsieve ontwerpregels zijn toegepast.\nAfhankelijkheden zijn bijgewerkt.",
-        "fr": "Adaptateur nécessite node.js 20 maintenant.\nAdaptateur nécessite js-controller 5 et admin 6 maintenant.\nL'adaptateur a été transféré vers jsonConfig et des règles de conception adaptées ont été appliquées.\nLes dépendances ont été actualisées.",
-        "it": "Adattatore richiede node.js 20 ora.\nAdattatore richiede js-controller 5 e admin 6 ora.\nL'adattatore è stato migrato a jsonConfig e le regole di progettazione reattiva sono state applicate.\nLe dipendenze sono state aggiornate.",
-        "es": "Adaptador requiere node.js 20 ahora.\nAdaptador requiere js-controller 5 y admin 6 ahora.\nAdaptador ha sido migrado a jsonConfig y se han aplicado reglas de diseño sensibles.\nSe han actualizado las dependencias.",
-        "pl": "Adapter wymaga Node.js 20 teraz.\nAdapter wymaga sterownika js- 5 i admin 6 teraz.\nAdapter został wyemigrowany do jsonConfig i responsywne zasady projektowania zostały zastosowane.\nZaktualizowano zależność.",
-        "uk": "Адаптер вимагає node.js 20 тепер.\nАдаптер вимагає js-controller 5 і admin 6 тепер.\nПерехідник був мігрований до jsonConfig і чуйних правил дизайну.\nОновлено залежність.",
-        "zh-cn": "适配器现在需要20号节点.\n适配器现在需要js控制器5和管理员6.\n适配器已迁移到jsonConfig,并应用了响应性设计规则.\n附属关系已经更新."
       }
     },
     "titleLang": {

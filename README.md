@@ -177,7 +177,7 @@ is true when TV is on and false if TV is off
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 2.7.1 (2026-05-10)
 - (krobipd) Handling of online state has been improved.
 - (krobipd) Support for picture settings has been added.
 - (krobipd) Timerhandling has been cleaned up.
