@@ -31,6 +31,12 @@ const PICTURE_KEYS = new Set([
     'justScan',
 ]);
 const PICTURE_NUMERIC_KEYS = new Set(['brightness', 'backlight', 'contrast', 'color', 'colorTemperature']);
+// eyeComfortMode is the only picture setting with just two values, so the
+// public state surface is `boolean` (true/false) for ergonomic scripting —
+// users no longer have to write `'on'`/`'off'` strings. The Luna API still
+// expects the lowercase strings, so we map at the boundary on both sides:
+// boolean ⇄ 'on'/'off' in setPictureSetting / coercePictureValue.
+const PICTURE_BOOLEAN_KEYS = new Set(['eyeComfortMode']);
 // Picture writes go through the generic "picture" category; justScan is the
 // one exception — it accepts writes via the dedicated "aspectRatio" category.
 // All reads go through "picture"; webOS authorisation blocks reads of
@@ -40,10 +46,44 @@ function setCategoryFor(key) {
     return key === 'justScan' ? 'aspectRatio' : 'picture';
 }
 
+// Map the boolean public state to the Luna-expected on/off string. Tolerates
+// users who still write 'on'/'off' from existing scripts.
+function pictureBoolToLuna(raw) {
+    if (typeof raw === 'boolean') {
+        return raw ? 'on' : 'off';
+    }
+    if (typeof raw === 'string') {
+        const t = raw.trim().toLowerCase();
+        if (t === 'on' || t === 'true' || t === '1') {
+            return 'on';
+        }
+        if (t === 'off' || t === 'false' || t === '0') {
+            return 'off';
+        }
+    }
+    return null;
+}
+
 function coercePictureValue(key, raw) {
     if (PICTURE_NUMERIC_KEYS.has(key)) {
         const n = typeof raw === 'number' ? raw : Number(raw);
         return Number.isFinite(n) ? n : null;
+    }
+    if (PICTURE_BOOLEAN_KEYS.has(key)) {
+        // TV reports `'on'` / `'off'` — surface as boolean for the state.
+        if (typeof raw === 'string') {
+            const t = raw.trim().toLowerCase();
+            if (t === 'on') {
+                return true;
+            }
+            if (t === 'off') {
+                return false;
+            }
+        }
+        if (typeof raw === 'boolean') {
+            return raw;
+        }
+        return null;
     }
     return typeof raw === 'string' ? raw : String(raw);
 }
@@ -786,7 +826,23 @@ const inputList = arr => {
 // TV executes via its onclose/onfail handlers. The alert is closed
 // programmatically right after creation, keeping the popup invisible.
 function setPictureSetting(key, value) {
-    const params = { category: setCategoryFor(key), settings: { [key]: value } };
+    // Boolean-typed picture states (currently only eyeComfortMode) map to
+    // 'on' / 'off' before crossing the Luna boundary. The state itself is
+    // typed `boolean` in io-package.json, so we ack the original boolean
+    // back unchanged and the Admin UI shows a real toggle.
+    let lunaValue = value;
+    let ackValue = value;
+    if (PICTURE_BOOLEAN_KEYS.has(key)) {
+        const mapped = pictureBoolToLuna(value);
+        if (mapped === null) {
+            adapter.log.warn(`set picture.${key}=${value} ignored — value is not a boolean`);
+            return;
+        }
+        lunaValue = mapped;
+        // Re-coerce so a tolerated 'on'/'true'-string write also acks as boolean.
+        ackValue = mapped === 'on';
+    }
+    const params = { category: setCategoryFor(key), settings: { [key]: lunaValue } };
     const lunaUri = 'luna://com.webos.settingsservice/setSystemSettings';
     sendCommand(
         'ssap://system.notifications/createAlert',
@@ -802,11 +858,11 @@ function setPictureSetting(key, value) {
         },
         (err, val) => {
             if (err) {
-                adapter.log.warn(`set picture.${key}=${value} failed: ${err}`);
+                adapter.log.warn(`set picture.${key}=${lunaValue} failed: ${err}`);
                 return;
             }
-            adapter.log.debug(`set picture.${key}=${value}: ${JSON.stringify(val)}`);
-            adapter.setState(`states.picture.${key}`, value, true);
+            adapter.log.debug(`set picture.${key}=${lunaValue}: ${JSON.stringify(val)}`);
+            adapter.setState(`states.picture.${key}`, ackValue, true);
             if (val && val.alertId) {
                 sendCommand('ssap://system.notifications/closeAlert', { alertId: val.alertId }, () => {});
             }
@@ -972,10 +1028,49 @@ function SetVolume(val) {
     }
 }
 
+// One-shot migration: upgrade `states.picture.eyeComfortMode` from the
+// previous string-with-on/off-states schema to a plain boolean so scripts
+// can use `setState(..., true)`. Idempotent — no-op once migrated.
+function migrateEyeComfortModeToBoolean(cb) {
+    const id = 'states.picture.eyeComfortMode';
+    adapter.getObject(id, (err, obj) => {
+        if (err || !obj || !obj.common) {
+            cb && cb();
+            return;
+        }
+        if (obj.common.type === 'boolean' && !obj.common.states) {
+            cb && cb();
+            return;
+        }
+        const patch = { common: { type: 'boolean', states: null } };
+        adapter.extendObject(id, patch, extErr => {
+            if (extErr) {
+                adapter.log.debug(`eyeComfortMode migration extendObject error: ${extErr}`);
+            } else {
+                adapter.log.info('Migrated states.picture.eyeComfortMode to boolean type');
+            }
+            // Coerce any leftover string value so a script polling right after
+            // the upgrade reads a real boolean.
+            adapter.getState(id, (gErr, st) => {
+                if (!gErr && st && typeof st.val === 'string') {
+                    const t = st.val.trim().toLowerCase();
+                    const v = t === 'on' || t === 'true' || t === '1';
+                    adapter.setState(id, v, true);
+                }
+                cb && cb();
+            });
+        });
+    });
+}
+
 function main() {
     if (adapter.config.ip) {
         adapter.log.info(`Ready. Configured WebOS TV IP: ${adapter.config.ip}`);
         adapter.subscribeStates('*');
+        // Run the one-shot eyeComfortMode boolean migration in the background.
+        // Failure is non-fatal — the adapter still works; only the state type
+        // remains string until the next start.
+        migrateEyeComfortModeToBoolean();
         const dir = path.join(utils.getAbsoluteDefaultDataDir(), adapter.namespace.replace('.', '_'));
         keyfile = path.join(dir, keyfile);
         adapter.log.debug(`adapter.config = ${JSON.stringify(adapter.config)}`);
