@@ -1066,13 +1066,9 @@
       "common": {
         "name": "Eye Comfort / Reduce Blue Light",
         "role": "switch",
-        "type": "string",
+        "type": "boolean",
         "read": true,
-        "write": true,
-        "states": {
-          "on": "On",
-          "off": "Off"
-        }
+        "write": true
       },
       "native": {}
     }
