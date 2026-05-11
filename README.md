@@ -177,6 +177,9 @@ is true when TV is on and false if TV is off
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+- (krobipd) Removed the eyeComfortMode boolean-migration that emitted `Migrated states.picture.eyeComfortMode to boolean type` on every adapter start. The js-controller schema merge already covers the type change on adapter upgrade; existing installs keep their state and a stale `states: {on, off}` enum is harmless. Run `iobroker upload lgtv` once if the picture-state still shows the old dropdown.
+
 ### 2.7.1 (2026-05-10)
 - (krobipd) Handling of online state has been improved.
 - (krobipd) Support for picture settings has been added.
